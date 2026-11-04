@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}登录{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  <section class="card auth-card">
+    <h1 class="page-title">登录</h1>
+    <form method="post" data-testid="login-form">
+      <label>用户名
+        <input type="text" name="username" value="{{ username }}" data-testid="login-username">
+      </label>
+      <label>密码
+        <input type="password" name="password" data-testid="login-password">
+      </label>
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <button type="submit" class="btn btn-primary" data-testid="login-submit">登录</button>
+    </form>
+    <p class="muted">测试账号：alice / alice123，bob / bob123</p>
+    <p>还没有账号？<a href="{{ url_for('main.register') }}">立即注册</a></p>
+  </section>
+</div>
+{% endblock %}

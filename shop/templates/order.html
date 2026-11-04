@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}订单详情{% endblock %}
+{% block content %}
+<h1 class="page-title">订单 #{{ order['id'] }}</h1>
+<div class="card">
+  <div class="summary-line">订单状态：<span class="status status-{{ order['status'] }}" data-testid="order-status">{{ status_label }}</span></div>
+  <div class="summary-item"><span>收货人</span><span>{{ order['name'] }} · {{ order['phone'] }}</span></div>
+  <div class="summary-item"><span>收货地址</span><span>{{ order['address'] }}</span></div>
+  {% if masked_card %}
+  <div class="summary-item"><span>支付卡号</span><span>{{ masked_card }}</span></div>
+  {% endif %}
+  <hr>
+  {% for item in items %}
+  <div class="summary-item">
+    <span>{{ item['name'] }} × {{ item['quantity'] }}</span>
+    <span>¥{{ '%.2f'|format(item['price'] * item['quantity']) }}</span>
+  </div>
+  {% endfor %}
+  <div class="summary-line total-line">订单总额 <strong data-testid="order-total">¥{{ '%.2f'|format(order['total']) }}</strong></div>
+  <p class="muted">下单时间：{{ order['created_at'] }}</p>
+  <div class="summary-actions">
+    {% if order['status'] == 'pending' %}
+    <a class="btn btn-primary" href="{{ url_for('main.pay', order_id=order['id']) }}">去支付</a>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('main.orders_list') }}">返回订单列表</a>
+  </div>
+</div>
+{% endblock %}

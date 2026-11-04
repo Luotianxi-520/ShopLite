@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}个人中心{% endblock %}
+{% block content %}
+<h1 class="page-title">个人中心</h1>
+<div class="checkout-layout">
+  <section class="card">
+    <h2>账号信息</h2>
+    <p><strong>用户名：</strong><span data-testid="profile-username">{{ user['username'] }}</span></p>
+    <p><strong>注册时间：</strong>{{ user['created_at'] }}</p>
+    <div class="bio-box">
+      <h3>个人简介</h3>
+      <div data-testid="bio-display">{{ user['bio']|safe }}</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>编辑资料</h2>
+    <form method="post" data-testid="profile-form">
+      <label>邮箱
+        <input type="text" name="email" value="{{ user['email'] }}" data-testid="profile-email">
+      </label>
+      <label>收货地址
+        <input type="text" name="address" value="{{ user['address'] }}" data-testid="profile-address">
+      </label>
+      <label>个人简介
+        <textarea name="bio" rows="4" data-testid="profile-bio">{{ user['bio'] }}</textarea>
+      </label>
+      <button type="submit" class="btn btn-primary" data-testid="profile-submit">保存</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}支付订单{% endblock %}
+{% block content %}
+<h1 class="page-title">支付订单 #{{ order['id'] }}</h1>
+<div class="checkout-layout">
+  <section class="card">
+    <h2>订单信息</h2>
+    {% for item in items %}
+    <div class="summary-item">
+      <span>{{ item['name'] }} × {{ item['quantity'] }}</span>
+      <span>¥{{ '%.2f'|format(item['price'] * item['quantity']) }}</span>
+    </div>
+    {% endfor %}
+    <div class="summary-line total-line">应付金额 <strong data-testid="pay-total">¥{{ '%.2f'|format(order['total']) }}</strong></div>
+    <p class="muted">模拟支付网关测试卡：4242 4242 4242 4242（成功），4000 0000 0000 0002（失败）。</p>
+  </section>
+
+  <section class="card">
+    <h2>银行卡支付</h2>
+    <form method="post" data-testid="pay-form">
+      <label>卡号
+        <input type="text" name="card_number" placeholder="4242 4242 4242 4242" data-testid="card-number">
+      </label>
+      <label>有效期
+        <input type="text" name="expiry" placeholder="MM/YY" data-testid="expiry">
+      </label>
+      <label>CVV
+        <input type="text" name="cvv" placeholder="123" data-testid="cvv">
+      </label>
+      <button type="submit" class="btn btn-primary" data-testid="pay-submit">确认支付 ¥{{ '%.2f'|format(order['total']) }}</button>
+    </form>
+    <form method="post" action="{{ url_for('main.pay_cancel', order_id=order['id']) }}">
+      <button type="submit" class="btn btn-secondary" data-testid="pay-cancel">取消支付</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

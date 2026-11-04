@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}注册{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  <section class="card auth-card">
+    <h1 class="page-title">注册新账号</h1>
+    <form method="post" data-testid="register-form">
+      <label>用户名
+        <input type="text" name="username" value="{{ username }}" data-testid="register-username">
+      </label>
+      <label>密码
+        <input type="password" name="password" data-testid="register-password">
+      </label>
+      <label>邮箱
+        <input type="text" name="email" value="{{ email }}" data-testid="register-email">
+      </label>
+      <label>收货地址
+        <input type="text" name="address" value="{{ address }}" data-testid="register-address">
+      </label>
+      <button type="submit" class="btn btn-primary" data-testid="register-submit">注册</button>
+    </form>
+    <p>已有账号？<a href="{{ url_for('main.login') }}">去登录</a></p>
+  </section>
+</div>
+{% endblock %}

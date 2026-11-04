@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}首页{% endblock %} · ShopLite</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="site-header" data-testid="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('main.index') }}" data-testid="brand">🛒 ShopLite</a>
+      <nav class="main-nav" data-testid="main-nav">
+        <a href="{{ url_for('main.index') }}">首页</a>
+        <a href="{{ url_for('main.cart_view') }}" data-testid="nav-cart">购物车 <span class="badge" data-testid="cart-count">{{ cart_count }}</span></a>
+        <a href="{{ url_for('main.orders_list') }}" data-testid="nav-orders">我的订单</a>
+        {% if current_username %}
+          <a href="{{ url_for('main.profile') }}" data-testid="nav-profile">{{ current_username }}</a>
+          <a href="{{ url_for('main.logout') }}" data-testid="nav-logout">退出登录</a>
+        {% else %}
+          <a href="{{ url_for('main.login') }}" data-testid="nav-login">登录</a>
+          <a href="{{ url_for('main.register') }}" data-testid="nav-register">注册</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}" data-testid="flash">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="container page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer" data-testid="site-footer">
+    <div class="container footer-inner">
+      <span>© 2026 ShopLite · 软件测试课程项目</span>
+      <span>仅供学习使用</span>
+    </div>
+  </footer>
+</body>
+</html>

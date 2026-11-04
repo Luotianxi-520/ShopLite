@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(pip --version)",
+      "Bash(ps -W)",
+      "Bash(python tests/security/security_scan.py)",
+      "Bash(powershell.exe -NoProfile -Command \"\\(Get-Item 'C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe'\\).VersionInfo.ProductVersion\")",
+      "Read(//c/Users/13044/.cache/selenium/**)",
+      "Read(//c/Users/13044/.cache/**)",
+      "Bash(curl -sI --max-time 20 \"https://msedgedriver.azureedge.net/LATEST_RELEASE_156_WINDOWS\")",
+      "Bash(curl -sI --max-time 20 \"https://msedgedriver.microsoft.com/LATEST_RELEASE_156_WINDOWS\")",
+      "Bash(curl -s --max-time 30 \"https://msedgedriver.microsoft.com/LATEST_RELEASE_156_WINDOWS\")",
+      "Bash(python -m pytest tests/ui --html=reports/ui-report.html --self-contained-html -q)",
+      "Bash(python -m pytest -q)",
+      "Bash(python run.py)",
+      "Bash(python -)",
+      "Bash(python -m compileall -q shop tests run.py)"
+    ]
+  }
+}

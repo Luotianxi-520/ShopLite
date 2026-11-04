@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ product['name'] }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('main.index') }}">← 返回商品列表</a>
+<section class="product-detail card">
+  <div class="detail-emoji">{{ product['emoji'] }}</div>
+  <div class="detail-info">
+    <span class="tag">{{ product['category'] }}</span>
+    <h1 data-testid="product-name">{{ product['name'] }}</h1>
+    <p class="price price-lg" data-testid="product-price">¥{{ '%.2f'|format(product['price']) }}</p>
+    <p class="description">{{ product['description'] }}</p>
+    <p class="stock-line">
+      {% if product['stock'] == 0 %}
+        <span class="stock stock-out" data-testid="stock-status">缺货</span>
+      {% elif product['stock'] <= 3 %}
+        <span class="stock stock-low" data-testid="stock-status">仅剩 {{ product['stock'] }} 件</span>
+      {% else %}
+        <span class="stock" data-testid="stock-status">库存 {{ product['stock'] }} 件</span>
+      {% endif %}
+    </p>
+    <form method="post" action="{{ url_for('main.cart_add', product_id=product['id']) }}" class="add-form">
+      <label>数量
+        <input type="number" name="qty" value="1" min="1" max="{{ product['stock'] if product['stock'] > 0 else 1 }}" data-testid="qty-input">
+      </label>
+      <button type="submit" class="btn btn-primary" data-testid="add-to-cart" {% if product['stock'] == 0 %}disabled{% endif %}>加入购物车</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

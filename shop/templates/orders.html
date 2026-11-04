@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}我的订单{% endblock %}
+{% block content %}
+<h1 class="page-title">我的订单</h1>
+
+{% if orders %}
+<div class="order-list">
+  {% for o in orders %}
+  <div class="order-row card" data-testid="order-row" data-order-id="{{ o['id'] }}">
+    <div class="order-main">
+      <strong>订单 #{{ o['id'] }}</strong>
+      <div class="muted">{{ o['created_at'] }}</div>
+    </div>
+    <div class="status status-{{ o['status'] }}" data-testid="order-status">{{ status_labels.get(o['status'], o['status']) }}</div>
+    <div class="order-total">¥{{ '%.2f'|format(o['total']) }}</div>
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('main.order_detail', order_id=o['id']) }}">查看详情</a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state" data-testid="empty-orders">还没有订单，去挑点喜欢的商品吧。</div>
+{% endif %}
+{% endblock %}
