@@ -65,8 +65,9 @@ ShopLite 是一个课程用简易电商平台，提供商品浏览、购物车�
 ### 3.3 自动化测试
 
 - 采用 Selenium 4 + pytest + Page Object Model，页面元素使用 `data-testid` 定位。
-- 全部使用显式等待（WebDriverWait），禁止 `time.sleep`。
+- 正常执行全部使用显式等待（WebDriverWait），禁止用 `time.sleep` 代替等待条件。
 - 每个用例前重建数据库、启动全新浏览器，保证独立性。
+- 默认使用 Edge 无头模式；演示时加 `--headed` 打开可见窗口，再加 `--slow [秒数]` 让每个浏览器操作后主动停顿，便于讲解每一步。
 - 覆盖核心链路与关键异常流：游客购物车合并、结算校验、支付失败、缺货商品。
 - 输出 pytest-html 报告，失败时保留截图（可按需扩展）。
 
@@ -91,7 +92,7 @@ ShopLite 是一个课程用简易电商平台，提供商品浏览、购物车�
 | Python | 3.15 |
 | Web 框架 | Flask 3.1 |
 | 数据库 | SQLite（测试使用临时库） |
-| 浏览器 | Microsoft Edge（headless 模式） |
+| 浏览器 | Microsoft Edge（默认 headless；`--headed --slow` 用于演示） |
 | 自动化 | Selenium 4、pytest 9、pytest-html |
 | 安全测试 | requests 脚本 + 手工 payload |
 | 被测服务地址 | `http://127.0.0.1:5000`（手工）；自动化测试使用随机端口 |

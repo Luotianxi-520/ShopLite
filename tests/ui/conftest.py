@@ -1,4 +1,5 @@
 import threading
+import time
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,35 @@ from shop.db import init_db
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCAL_EDGEDRIVER = ROOT / "drivers" / "msedgedriver.exe"
+
+_SLOW_MOTION_INSTALLED = False
+
+
+def _install_slow_motion(delay):
+    """演示模式：在常用浏览器操作后停顿，便于讲解每一步。"""
+    global _SLOW_MOTION_INSTALLED
+    if delay <= 0 or _SLOW_MOTION_INSTALLED:
+        return
+
+    from selenium.webdriver.remote.webdriver import WebDriver
+    from selenium.webdriver.remote.webelement import WebElement
+
+    def with_pause(original):
+        def wrapped(*args, **kwargs):
+            result = original(*args, **kwargs)
+            time.sleep(delay)
+            return result
+
+        return wrapped
+
+    for cls, method in (
+        (WebDriver, "get"),
+        (WebElement, "click"),
+        (WebElement, "send_keys"),
+        (WebElement, "clear"),
+    ):
+        setattr(cls, method, with_pause(getattr(cls, method)))
+    _SLOW_MOTION_INSTALLED = True
 
 
 class ServerInfo:
@@ -43,13 +73,16 @@ def base_url(server):
 
 
 @pytest.fixture()
-def driver():
+def driver(request):
     from selenium import webdriver
     from selenium.common.exceptions import WebDriverException
     from selenium.webdriver.edge.service import Service
 
+    _install_slow_motion(request.config.getoption("--slow", default=0.0))
+
     options = webdriver.EdgeOptions()
-    options.add_argument("--headless=new")
+    if not request.config.getoption("--headed", default=False):
+        options.add_argument("--headless=new")
     options.add_argument("--window-size=1440,900")
     options.add_argument("--disable-gpu")
     options.add_argument("--lang=zh-CN")

@@ -15,7 +15,7 @@
 |---|---|
 | Web 应用 | Python 3 + Flask + SQLite + Jinja2 |
 | 功能测试 | pytest + Flask test client |
-| UI 自动化 | Selenium 4 + pytest + Page Object Model（Microsoft Edge 无头模式） |
+| UI 自动化 | Selenium 4 + pytest + Page Object Model（Microsoft Edge，默认无头，`--headed` 可显示窗口） |
 | 安全测试 | requests 手工 payload + SQLite 数据核验 |
 | 测试报告 | pytest-html |
 
@@ -66,6 +66,28 @@ UI 自动化测试（需要安装 Microsoft Edge）：
 ```bash
 pytest tests/ui --html=reports/ui-report.html --self-contained-html
 ```
+
+默认以无头模式运行。如果需要看到 Edge 自动打开并观察点击、输入、跳转的完整过程，加上 `--headed`：
+
+```bash
+pytest tests/ui --headed
+pytest tests/ui --headed --html=reports/ui-report.html --self-contained-html
+```
+
+演示或答辩时再加上 `--slow`，每个浏览器操作后会停顿指定秒数（默认 1 秒）：
+
+```bash
+# 每步停 1 秒
+pytest tests/ui --headed --slow
+
+# 每步停 2 秒
+pytest tests/ui --headed --slow 2
+
+# 只演示核心购买链路，节奏更紧凑
+pytest tests/ui/test_purchase_flow.py::test_end_to_end_purchase --headed --slow 2
+```
+
+`--slow` 仅用于演示，正常回归执行不要加，避免拖慢测试。
 
 脚本优先使用仓库内 `drivers/msedgedriver.exe`（与本机 Edge 156.0.4314.50 匹配）。如果该文件不存在，或与对方的 Edge 版本不匹配导致启动失败，会自动回退到 Selenium Manager 下载匹配驱动；网络受限时可手动下载对应版本驱动放入 `drivers/`。
 
