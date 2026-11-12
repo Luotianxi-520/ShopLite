@@ -48,6 +48,52 @@ python -m shop.db --reset
 | 4242 4242 4242 4242 | 支付成功 |
 | 4000 0000 0000 0002 | 支付失败 |
 
+## 数据库设计
+
+项目使用 SQLite 单文件数据库（默认 `shop.db`，可用环境变量 `SHOP_DB` 指定路径），共 5 张表。建表语句与种子数据见 `shop/db.py`。
+
+### 关系模型
+
+```text
+users 1 ──< cart_items >── 1 products
+users 1 ──< orders 1 ──< order_items >── products（弱引用）
+```
+
+- `cart_items`、`orders`、`order_items` 中的 `user_id`、`product_id`、`order_id` 是逻辑外键；schema 未声明物理 `FOREIGN KEY`，便于测试时直接删库重建。
+- 游客购物车不落库，保存在 Flask session 中；登录时合并进 `cart_items`。
+
+### 表说明
+
+| 表 | 作用 | 关键字段与约束 |
+|---|---|---|
+| `users` | 用户账户 | `username UNIQUE`；`password` 明文（安全测试靶点）；`email` / `address` / `bio` |
+| `products` | 商品目录 | `price REAL`、`stock INTEGER`；分类为自由文本，无独立分类表 |
+| `cart_items` | 登录用户购物车 | `UNIQUE(user_id, product_id)`，同一商品只有一行 |
+| `orders` | 订单头 | 收货信息快照 `name` / `address` / `phone`；`status` 默认 `pending`；`total` |
+| `order_items` | 订单行 | 保存下单时的 `name` / `price` 快照；`product_id` 仅作追溯 |
+
+### 数据流
+
+1. **加购**：游客写 session；登录用户写 `cart_items`，数量不超过 `products.stock`。
+2. **登录**：`_merge_guest_cart` 把游客购物车按 `min(已有 + 游客, 库存)` 合并进数据库，然后清空 session。
+3. **结算**：在一个事务内写入 `orders` 和全部 `order_items`，订单状态为 `pending`。
+4. **支付**：仅 `pending` 订单可支付；成功后更新为 `paid`、记录卡号并清空购物车；失败保持 `pending`。
+5. **取消**：仅 `pending` 订单可改为 `cancelled`。
+
+### 设计取舍
+
+- **订单快照**：`orders` 保存收货信息，`order_items` 保存商品名与单价，商品或用户资料后续变更不影响历史订单。
+- **购物车唯一约束**：`UNIQUE(user_id, product_id)` + `ON CONFLICT` upsert，避免同一商品多行。
+- **游客/登录双轨**：未登录也可使用购物车，登录时自动合并，兼顾体验与数据归属。
+- **演示优先**：未加物理外键与额外索引，`init_db(reset=True)` 直接删库重建，方便测试隔离。
+
+### 已知限制
+
+- 库存只做加购上限校验，支付成功后不会扣减 `products.stock`。
+- 金额使用 `REAL` 浮点存储，应用层统一 `round(..., 2)`；生产环境应改为整数分或 `DECIMAL`。
+- `orders.total` 接受客户端提交值，未与 `order_items` 汇总强制校验（安全用例 SEC-02 的注入点）。
+- 明文密码、明文卡号、无 CSRF 等为课程安全测试刻意保留，详见 `docs/security-report.md`。
+
 ## 运行效果
 
 截图见 `reports/screenshots/`（首页、商品详情、购物车、结算、支付、订单详情）。启动 `python run.py` 后可访问 <http://127.0.0.1:5000> 实际体验完整购买流程。

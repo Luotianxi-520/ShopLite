@@ -32,9 +32,11 @@
 <div class="product-grid">
   {% for p in products %}
   <article class="product-card" data-testid="product-card" data-product-id="{{ p['id'] }}" data-category="{{ p['category'] }}" data-price="{{ p['price'] }}">
-    <div class="product-emoji">{{ p['emoji'] }}</div>
-    <div class="product-body">
+    <div class="product-media">
+      <div class="product-emoji" aria-hidden="true">{{ p['emoji'] }}</div>
       <span class="tag">{{ p['category'] }}</span>
+    </div>
+    <div class="product-body">
       <h3 class="product-name">
         <a href="{{ url_for('main.product_detail', product_id=p['id']) }}" data-testid="product-link">{{ p['name'] }}</a>
       </h3>
@@ -48,7 +50,7 @@
           <span class="stock">库存 {{ p['stock'] }}</span>
         {% endif %}
       </div>
-      <a class="btn btn-secondary btn-sm" href="{{ url_for('main.product_detail', product_id=p['id']) }}">查看详情</a>
+      <a class="product-link" href="{{ url_for('main.product_detail', product_id=p['id']) }}">查看详情 <span aria-hidden="true">→</span></a>
     </div>
   </article>
   {% endfor %}
