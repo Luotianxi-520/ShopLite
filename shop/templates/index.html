@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block title %}商品列表{% endblock %}
 {% block content %}
+<header class="listing-head">
+  <p class="eyebrow">CURATED SELECTION</p>
+  <h1 class="listing-title">生活选物</h1>
+  <p class="listing-sub">认真挑一些经得起日常的东西。</p>
+</header>
+
 <section class="filter-panel" data-testid="filter-panel">
   <form method="get" action="{{ url_for('main.index') }}" class="filter-form">
     <input type="search" name="q" value="{{ q }}" placeholder="搜索商品名称" data-testid="search-input">
@@ -33,7 +39,12 @@
   {% for p in products %}
   <article class="product-card" data-testid="product-card" data-product-id="{{ p['id'] }}" data-category="{{ p['category'] }}" data-price="{{ p['price'] }}">
     <div class="product-media">
-      <div class="product-emoji" aria-hidden="true">{{ p['emoji'] }}</div>
+      {% set img = product_image(p['id']) %}
+      {% if img %}
+        <img class="product-img" src="{{ url_for('static', filename=img) }}" alt="" width="448" height="448" loading="{{ 'eager' if loop.index <= 3 else 'lazy' }}" decoding="async">
+      {% else %}
+        <div class="product-emoji" aria-hidden="true">{{ p['emoji'] }}</div>
+      {% endif %}
       <span class="tag">{{ p['category'] }}</span>
     </div>
     <div class="product-body">

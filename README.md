@@ -61,6 +61,7 @@ users 1 ──< orders 1 ──< order_items >── products（弱引用）
 
 - `cart_items`、`orders`、`order_items` 中的 `user_id`、`product_id`、`order_id` 是逻辑外键；schema 未声明物理 `FOREIGN KEY`，便于测试时直接删库重建。
 - 游客购物车不落库，保存在 Flask session 中；登录时合并进 `cart_items`。
+- 用 SQLite 查看器打开时还会看到 `sqlite_sequence`：这是 `AUTOINCREMENT` 自动生成的内部表，用于记录各表最后使用的自增 ID，不属于业务设计，无需关心。
 
 ### 表说明
 
@@ -153,7 +154,8 @@ shop/                        被测系统
   views.py                   路由与业务逻辑
   db.py                      建表与种子数据
   templates/                 页面模板
-  static/style.css           统一样式
+  static/style.css           深色精品店主题样式
+  static/images/products/    商品图（按商品 ID 命名，如 1.jpeg）
 tests/
   functional/                功能测试（pytest + test client）
     test_cart.py             购物车
@@ -171,6 +173,8 @@ docs/
   test-cases.md              测试用例与追溯矩阵
   security-report.md         安全测试报告
 ```
+
+商品图按 `<商品 ID>.jpeg` 命名（也支持 `.jpg` / `.png` / `.webp`），放入 `shop/static/images/products/` 即可生效；缺图时自动回退到 emoji，无需修改数据库。
 
 ## 打包分享给别人
 

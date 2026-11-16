@@ -8,7 +8,12 @@
   <div class="cart-list">
     {% for item in items %}
     <div class="cart-row" data-testid="cart-row" data-product-id="{{ item.product_id }}">
-      <div class="cart-emoji" aria-hidden="true">{{ item.emoji }}</div>
+      {% set img = product_image(item.product_id) %}
+      {% if img %}
+        <img class="cart-thumb" src="{{ url_for('static', filename=img) }}" alt="" width="64" height="64" loading="lazy" decoding="async">
+      {% else %}
+        <div class="cart-emoji" aria-hidden="true">{{ item.emoji }}</div>
+      {% endif %}
       <div class="cart-info">
         <a class="cart-name" href="{{ url_for('main.product_detail', product_id=item.product_id) }}">{{ item.name }}</a>
         <span class="muted">单价 ¥{{ '%.2f'|format(item.price) }} · 库存 {{ item.stock }} 件</span>

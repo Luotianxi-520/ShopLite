@@ -1,7 +1,11 @@
 """ShopLite 应用工厂。"""
+from pathlib import Path
+
 from flask import Flask, g, render_template
 
 from . import db
+
+PRODUCT_IMAGE_EXTS = (".jpeg", ".jpg", ".png", ".webp")
 
 
 def get_db():
@@ -17,6 +21,18 @@ def create_app(db_path=None):
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "shoplite-course-secret-key"
     app.config["DATABASE"] = db_path or db.DEFAULT_DB
+
+    image_dir = Path(app.static_folder) / "images" / "products"
+
+    def product_image(product_id):
+        """按商品 ID 查找本地图片；找不到时返回 None，由模板回退到 emoji。"""
+        for ext in PRODUCT_IMAGE_EXTS:
+            name = f"{product_id}{ext}"
+            if (image_dir / name).exists():
+                return f"images/products/{name}"
+        return None
+
+    app.jinja_env.globals["product_image"] = product_image
 
     from .views import bp, cart_count, logged_in_username
 

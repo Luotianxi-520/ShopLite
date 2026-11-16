@@ -7,7 +7,15 @@
     <h2>商品清单</h2>
     {% for item in items %}
     <div class="summary-item" data-testid="checkout-item">
-      <span>{{ item.emoji }} {{ item.name }} × {{ item.qty }}</span>
+      <span class="summary-item-name">
+        {% set img = product_image(item.product_id) %}
+        {% if img %}
+          <img class="checkout-thumb" src="{{ url_for('static', filename=img) }}" alt="" width="36" height="36" loading="lazy" decoding="async">
+        {% else %}
+          <span class="checkout-emoji" aria-hidden="true">{{ item.emoji }}</span>
+        {% endif %}
+        <span>{{ item.name }} × {{ item.qty }}</span>
+      </span>
       <span>¥{{ '%.2f'|format(item.subtotal) }}</span>
     </div>
     {% endfor %}
