@@ -125,6 +125,20 @@ def test_payment_invalid_card_format(client, query):
     assert status == "pending"
 
 
+def test_payment_rejects_expired_card(client, query):
+    order_id = prepare_order(client)
+
+    resp = client.post(
+        f"/pay/{order_id}",
+        data={"card_number": "4242 4242 4242 4242", "expiry": "01/20", "cvv": "123"},
+        follow_redirects=True,
+    )
+    assert "银行卡已过期" in resp.text
+
+    status = query("SELECT status FROM orders WHERE id = ?", (order_id,))[0]["status"]
+    assert status == "pending"
+
+
 def test_cancel_payment(client, query):
     order_id = prepare_order(client)
 

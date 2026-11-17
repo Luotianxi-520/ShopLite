@@ -79,12 +79,12 @@ def check_stored_xss(_db_path):
     session = requests.Session()
     session.post(
         f"{BASE}/register",
-        data={"username": "xss_user", "password": "xss123", "email": "", "address": ""},
+        data={"username": "xss_user", "password": "XssUser#2026", "email": "", "address": ""},
         allow_redirects=True,
     )
     session.post(
         f"{BASE}/login",
-        data={"username": "xss_user", "password": "xss123"},
+        data={"username": "xss_user", "password": "XssUser#2026"},
         allow_redirects=True,
     )
     payload = "<script>alert('stored')</script>"

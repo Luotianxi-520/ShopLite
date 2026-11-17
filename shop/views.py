@@ -1,5 +1,6 @@
 """页面与表单路由."""
 import re
+from datetime import date
 from math import ceil
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, session, url_for
@@ -10,6 +11,20 @@ bp = Blueprint("main", __name__)
 
 PAGE_SIZE = 8
 STATUS_LABELS = {"pending": "待支付", "paid": "已支付", "cancelled": "已取消"}
+
+PASSWORD_MIN_LENGTH = 8
+PASSWORD_SYMBOLS = r"""!@#$%^&*()_+-=[]{};':"\|,.<>/?`~"""
+
+
+def _password_is_strong(password):
+    """至少 8 位,且同时包含大写字母、小写字母、数字和符号."""
+    return (
+        len(password) >= PASSWORD_MIN_LENGTH
+        and re.search(r"[A-Z]", password) is not None
+        and re.search(r"[a-z]", password) is not None
+        and re.search(r"\d", password) is not None
+        and any(char in PASSWORD_SYMBOLS for char in password)
+    )
 
 
 # ---------- 会话与购物车辅助 ----------
@@ -347,6 +362,17 @@ def checkout():
     return render_template("checkout.html", items=items, total=get_cart_total(), user=user)
 
 
+def _parse_expiry(expiry):
+    """解析 MM/YY，返回 (年, 月)；格式或月份非法返回 None."""
+    match = re.fullmatch(r"(\d{2})/(\d{2})", expiry)
+    if match is None:
+        return None
+    month = int(match.group(1))
+    if not 1 <= month <= 12:
+        return None
+    return 2000 + int(match.group(2)), month
+
+
 @bp.route("/pay/<int:order_id>", methods=["GET", "POST"])
 def pay(order_id):
     user = current_user()
@@ -368,12 +394,17 @@ def pay(order_id):
         card = request.form.get("card_number", "").replace(" ", "")
         expiry = request.form.get("expiry", "").strip()
         cvv = request.form.get("cvv", "").strip()
+        expiry_parts = _parse_expiry(expiry)
         if (
             not re.fullmatch(r"\d{16}", card)
-            or not re.fullmatch(r"\d{2}/\d{2}", expiry)
+            or expiry_parts is None
             or not re.fullmatch(r"\d{3}", cvv)
         ):
             flash("支付信息格式不正确,请检查卡号、有效期和 CVV", "error")
+            return render_template("pay.html", order=order, items=items)
+        today = date.today()
+        if expiry_parts < (today.year, today.month):
+            flash("银行卡已过期,请使用有效期内的银行卡", "error")
             return render_template("pay.html", order=order, items=items)
         if card.endswith("0002"):
             flash("支付失败:该银行卡被拒绝,请更换支付方式", "error")
@@ -492,6 +523,8 @@ def register():
             flash("用户名和密码不能为空", "error")
         elif db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone():
             flash("用户名已存在,请更换", "error")
+        elif not _password_is_strong(password):
+            flash("密码需至少 8 位,且包含大写字母、小写字母、数字和符号", "error")
         else:
             # 未校验密码复杂度(课程安全测试的已知弱点)
             db.execute(

@@ -58,6 +58,7 @@
 | F-031 | 支付成功流程 | 有待支付订单 | 提交 4242 卡号 | 订单已支付，购物车清空，订单历史可见 | P0 | test_payment_success_flow |
 | F-032 | 支付失败流程 | 有待支付订单 | 提交 0002 卡号 | 提示支付失败，订单仍待支付，购物车保留 | P0 | test_payment_declined_keeps_order_pending |
 | F-033 | 支付卡号格式校验 | 有待支付订单 | 卡号填 1234 | 提示格式不正确，订单仍待支付 | P1 | test_payment_invalid_card_format |
+| F-033A | 支付有效期校验 | 有待支付订单 | 有效期填 01/20（已过期） | 提示银行卡已过期，订单仍待支付 | P1 | test_payment_rejects_expired_card |
 | F-034 | 取消支付 | 有待支付订单 | 点击「取消支付」 | 订单状态变为已取消 | P1 | test_cancel_payment |
 | F-035 | 订单越权访问 | alice 已创建订单 | bob 访问该订单详情和支付接口 | 均返回 404 | P0 | test_order_detail_only_visible_to_owner |
 
@@ -68,6 +69,7 @@
 | F-036 | 注册后登录 | 用户名 carol 不存在 | 注册 carol 后登录 | 注册成功提示，登录成功 | P1 | test_register_then_login |
 | F-037 | 重复用户名注册 | alice 已存在 | 注册 alice | 提示用户名已存在 | P1 | test_register_duplicate_username |
 | F-038 | 注册必填校验 | 无 | 空用户名、空密码提交 | 提示用户名和密码不能为空 | P1 | test_register_requires_username_and_password |
+| F-038A | 注册密码强度校验 | 无 | 密码不足 8 位或缺少大小写/数字/符号 | 提示密码规则，不创建账号 | P1 | test_register_rejects_weak_password |
 | F-039 | 密码错误登录 | alice 存在 | 使用错误密码登录 | 提示密码错误 | P0 | test_login_with_wrong_password |
 | F-040 | 不存在用户登录 | 无 | 使用不存在用户名登录 | 提示用户名不存在 | P1 | test_login_with_unknown_user |
 | F-041 | 退出登录清除状态 | alice 已登录 | 点击退出登录 | 会话清除，导航出现登录/注册 | P0 | test_logout_clears_session |
@@ -107,6 +109,8 @@
 | SEC-10 | 用户名枚举 | 低 | 对比存在用户与不存在用户的错误提示 | 提示可区分，可枚举账号 | check_user_enumeration |
 | SEC-11 | 会话 Cookie 缺少 Secure | 低 | 检查登录响应 Set-Cookie | 无 Secure 标志 | check_cookie_flags |
 | SEC-12 | 用户密码明文存储 | 高 | 注册新账号后查询 users 表 | password 字段为明文 | check_plaintext_password |
+
+> SEC-06 已于 2026-11-17 修复，复测显示「未发现」；表中其余项仍为修复前现象。
 
 ## 4. 执行结果汇总
 

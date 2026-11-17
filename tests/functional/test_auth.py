@@ -1,15 +1,17 @@
+import pytest
+
 from tests.functional.helpers import add_to_cart, login
 
 
 def test_register_then_login(client):
     resp = client.post(
         "/register",
-        data={"username": "carol", "password": "carol123", "email": "carol@example.com", "address": ""},
+        data={"username": "carol", "password": "Carol123!", "email": "carol@example.com", "address": ""},
         follow_redirects=True,
     )
     assert "注册成功,请登录" in resp.text
 
-    resp = login(client, "carol", "carol123")
+    resp = login(client, "carol", "Carol123!")
     assert "欢迎回来,carol!" in resp.text
 
 
@@ -29,6 +31,26 @@ def test_register_requires_username_and_password(client):
         follow_redirects=True,
     )
     assert "用户名和密码不能为空" in resp.text
+
+
+@pytest.mark.parametrize(
+    "password",
+    [
+        "Sh0rt!",    # 不足 8 位
+        "sh0rty!#",  # 缺大写字母
+        "SH0RTY!#",  # 缺小写字母
+        "Shorty!!",  # 缺数字
+        "Shorty12",  # 缺符号
+    ],
+)
+def test_register_rejects_weak_password(client, query, password):
+    resp = client.post(
+        "/register",
+        data={"username": "weak", "password": password, "email": "", "address": ""},
+        follow_redirects=True,
+    )
+    assert "密码需至少 8 位" in resp.text
+    assert query("SELECT COUNT(*) AS n FROM users WHERE username = 'weak'")[0]["n"] == 0
 
 
 def test_login_with_wrong_password(client):
