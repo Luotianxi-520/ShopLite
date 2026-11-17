@@ -1,6 +1,3 @@
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-
 from .base_page import BasePage
 
 
@@ -15,7 +12,9 @@ class PaymentPage(BasePage):
             field.clear()
             field.send_keys(value)
 
-        form = self.wait_for('[data-testid="pay-form"]')
+        self.wait_for('[data-testid="pay-form"]')
+        previous_url = self.driver.current_url
         self.click('[data-testid="pay-submit"]')
-        WebDriverWait(self.driver, 10).until(EC.staleness_of(form))
+        # 支付成功会跳转到订单页，卡被拒绝则留在支付页并显示 flash
+        self.wait_for_reload(previous_url)
         return self

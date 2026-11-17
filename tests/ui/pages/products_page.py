@@ -1,6 +1,5 @@
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import Select
 
 from .base_page import BasePage
 from .product_page import ProductPage
@@ -13,9 +12,10 @@ class ProductsPage(BasePage):
         return self
 
     def _submit_filters(self):
-        form = self.wait_for('[data-testid="filter-panel"]')
+        self.wait_for('[data-testid="filter-panel"]')
+        previous_url = self.driver.current_url
         self.click('[data-testid="filter-submit"]')
-        WebDriverWait(self.driver, 10).until(EC.staleness_of(form))
+        self.wait_for_url_change(previous_url)
         self.wait_for('[data-testid="filter-panel"]')
 
     def filter_category(self, label):

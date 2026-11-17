@@ -1,6 +1,4 @@
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from .base_page import BasePage
 from .checkout_page import CheckoutPage
@@ -20,7 +18,7 @@ class CartPage(BasePage):
         field.clear()
         field.send_keys(str(quantity))
         self.click(f'[data-product-id="{product_id}"] [data-testid="qty-update"]')
-        WebDriverWait(self.driver, 10).until(EC.staleness_of(field))
+        # 提交后重定向回购物车，等新页面上的 flash 出现（不要用 staleness_of 判断旧元素）
         self.wait_for('[data-testid="flash"]')
         return self
 

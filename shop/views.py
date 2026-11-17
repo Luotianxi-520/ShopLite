@@ -1,4 +1,4 @@
-"""页面与表单路由。"""
+"""页面与表单路由."""
 import re
 from math import ceil
 
@@ -37,7 +37,7 @@ def _pairs_for_guest():
 
 
 def get_cart_items():
-    """购物车明细：登录用户读数据库，游客读 session。"""
+    """购物车明细:登录用户读数据库,游客读 session."""
     db = get_db()
     user_id = session.get("user_id")
     pairs = _pairs_for_user(user_id) if user_id else _pairs_for_guest()
@@ -109,7 +109,7 @@ def _clear_cart(user_id):
 
 
 def _merge_guest_cart(user_id):
-    """登录时把游客购物车合并进用户购物车，数量不超过库存。"""
+    """登录时把游客购物车合并进用户购物车,数量不超过库存."""
     cart = session.get("cart") or {}
     if not cart:
         return
@@ -135,7 +135,7 @@ def _merge_guest_cart(user_id):
 
 
 def _back_url():
-    """返回来源页（仅允许站内地址）。"""
+    """返回来源页(仅允许站内地址)."""
     referrer = request.referrer
     if referrer and referrer.startswith(request.host_url):
         return referrer
@@ -253,7 +253,7 @@ def cart_add(product_id):
     new_qty = min(current + qty, product["stock"])
     _set_cart_quantity(product_id, new_qty)
     if new_qty < current + qty:
-        flash(f"库存不足，「{product['name']}」最多可购买 {product['stock']} 件", "error")
+        flash(f"库存不足,「{product['name']}」最多可购买 {product['stock']} 件", "error")
     else:
         flash(f"已将「{product['name']}」加入购物车", "success")
     return redirect(_back_url())
@@ -272,7 +272,7 @@ def cart_update(product_id):
         flash("已移出购物车", "info")
     elif qty > product["stock"]:
         _set_cart_quantity(product_id, product["stock"])
-        flash(f"库存不足，「{product['name']}」最多可购买 {product['stock']} 件", "error")
+        flash(f"库存不足,「{product['name']}」最多可购买 {product['stock']} 件", "error")
     else:
         _set_cart_quantity(product_id, qty)
         flash("数量已更新", "success")
@@ -305,7 +305,7 @@ def checkout():
         return redirect(url_for("main.login", next=request.path))
     items = get_cart_items()
     if not items:
-        flash("购物车是空的，先去挑选商品吧", "error")
+        flash("购物车是空的,先去挑选商品吧", "error")
         return redirect(url_for("main.cart_view"))
 
     if request.method == "POST":
@@ -373,10 +373,10 @@ def pay(order_id):
             or not re.fullmatch(r"\d{2}/\d{2}", expiry)
             or not re.fullmatch(r"\d{3}", cvv)
         ):
-            flash("支付信息格式不正确，请检查卡号、有效期和 CVV", "error")
+            flash("支付信息格式不正确,请检查卡号、有效期和 CVV", "error")
             return render_template("pay.html", order=order, items=items)
         if card.endswith("0002"):
-            flash("支付失败：该银行卡被拒绝，请更换支付方式", "error")
+            flash("支付失败:该银行卡被拒绝,请更换支付方式", "error")
             return render_template("pay.html", order=order, items=items)
 
         db.execute(
@@ -385,7 +385,7 @@ def pay(order_id):
         db.commit()
         _clear_cart(user["id"])
         print(f"[mock-gateway] 支付成功 order={order_id} card={card}")
-        flash("支付成功，感谢您的购买！", "success")
+        flash("支付成功,感谢您的购买!", "success")
         return redirect(url_for("main.order_detail", order_id=order_id))
 
     return render_template("pay.html", order=order, items=items)
@@ -456,14 +456,14 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        # 登录查询使用字符串拼接（课程安全测试的已知注入点）
+        # 登录查询使用字符串拼接(课程安全测试的已知注入点)
         sql = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
         row = get_db().execute(sql).fetchone()
         if row is None:
             exists = get_db().execute(
                 "SELECT id FROM users WHERE username = ?", (username,)
             ).fetchone()
-            flash("密码错误，请重试" if exists else "用户名不存在", "error")
+            flash("密码错误,请重试" if exists else "用户名不存在", "error")
             return render_template(
                 "login.html", username=username, next_url=request.form.get("next", "")
             )
@@ -471,7 +471,7 @@ def login():
         _merge_guest_cart(row["id"])
         session["user_id"] = row["id"]
         session["username"] = row["username"]
-        flash(f"欢迎回来，{row['username']}！", "success")
+        flash(f"欢迎回来,{row['username']}!", "success")
         next_url = request.form.get("next", "")
         if next_url.startswith("/") and not next_url.startswith("//"):
             return redirect(next_url)
@@ -491,15 +491,15 @@ def register():
         if not username or not password:
             flash("用户名和密码不能为空", "error")
         elif db.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone():
-            flash("用户名已存在，请更换", "error")
+            flash("用户名已存在,请更换", "error")
         else:
-            # 未校验密码复杂度（课程安全测试的已知弱点）
+            # 未校验密码复杂度(课程安全测试的已知弱点)
             db.execute(
                 "INSERT INTO users (username, password, email, address) VALUES (?, ?, ?, ?)",
                 (username, password, email, address),
             )
             db.commit()
-            flash("注册成功，请登录", "success")
+            flash("注册成功,请登录", "success")
             return redirect(url_for("main.login"))
         return render_template(
             "register.html", username=username, email=email, address=address

@@ -7,10 +7,10 @@ def test_register_then_login(client):
         data={"username": "carol", "password": "carol123", "email": "carol@example.com", "address": ""},
         follow_redirects=True,
     )
-    assert "注册成功，请登录" in resp.text
+    assert "注册成功,请登录" in resp.text
 
     resp = login(client, "carol", "carol123")
-    assert "欢迎回来，carol！" in resp.text
+    assert "欢迎回来,carol!" in resp.text
 
 
 def test_register_duplicate_username(client):
@@ -33,7 +33,7 @@ def test_register_requires_username_and_password(client):
 
 def test_login_with_wrong_password(client):
     resp = login(client, "alice", "wrong-password")
-    assert "密码错误，请重试" in resp.text
+    assert "密码错误,请重试" in resp.text
 
 
 def test_login_with_unknown_user(client):

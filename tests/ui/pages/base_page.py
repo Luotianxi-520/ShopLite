@@ -27,6 +27,25 @@ class BasePage:
     def wait_until(self, condition, timeout=10):
         return WebDriverWait(self.driver, timeout).until(condition)
 
+    def wait_for_url_change(self, previous_url, timeout=10):
+        self.wait_until(EC.url_changes(previous_url), timeout=timeout)
+        return self
+
+    def wait_for_reload(self, previous_url, timeout=10):
+        """等待表单提交触发的整页刷新完成。
+
+        不要用 EC.staleness_of：文档切换的瞬间，EdgeDriver 的 is_enabled()
+        会返回 DevTools 错误 -32000 "Node with given id does not belong to
+        the document"，而不是 StaleElementReferenceException，导致用例偶发失败。
+        这里改为等待新页面自身可观察的结果：URL 已变化，或页面渲染出 flash。
+        """
+        self.wait_until(
+            lambda d: d.current_url != previous_url
+            or d.find_elements(By.CSS_SELECTOR, '[data-testid="flash"]'),
+            timeout=timeout,
+        )
+        return self
+
     def click(self, css):
         self.wait_for(css).click()
 
